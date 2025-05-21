@@ -1,0 +1,2 @@
+# calculater
+Simple CUI calculater
