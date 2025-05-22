@@ -1,32 +1,69 @@
 package io.github.noooda.calculator;
 
 import java.util.Scanner;
-import java.util.List;
-import java.util.ArrayList;
 
 
 public class Calculator {
-    List<Integer> nums;
-    List<String> ops;
+    int ans;
+    int num;
+    String operator;
 
     public Calculator() {
-        this.nums = new ArrayList<>();
-        this.ops = new ArrayList<>();
-        System.out.println(this.nums);
-        System.out.println(this.ops);
+        this.ans = 0;
+        this.num = 0;
+        this.operator = "";
     }
 
     public void start() {
+        System.out.println("Enter \"q\" to quit.");
+
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter 'exit' to quit.");
+
         while (true) {
-            System.out.print("Enter an expression: ");
             String input = scanner.nextLine();
-            if (input.equalsIgnoreCase("exit")) {
-                System.out.println(input);
+
+            if (input.equalsIgnoreCase("q")) {
                 break;
             }
+
+            if (input.matches("\\d+")) {
+                this.num = Integer.parseInt(input);
+
+                if (this.operator.isEmpty()) {
+                    this.ans = this.num;
+                } else {
+                    switch (this.operator) {
+                        case "+":
+                            this.ans += this.num;
+                            break;
+                        case "-":
+                            this.ans -= this.num;
+                            break;
+                        case "*":
+                            this.ans *= this.num;
+                            break;
+                        case "/":
+                            if (this.num != 0) {
+                                this.ans /= this.num;
+                            } else {
+                                System.out.println("Cannot divide by zero.");
+                            }
+                            break;
+                        case "%":
+                            this.ans %= this.num;
+                            break;
+                    }
+
+                    this.operator = "";
+                    System.out.println("Current result: " + this.ans);
+                }
+            }
+
+            if (input.matches("[+\\-*/%]")) {
+                this.operator = input;
+            }
         }
+
         scanner.close();
     }
 }
