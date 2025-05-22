@@ -14,7 +14,7 @@ Support the following operations:
 
 ## Output
 Display the result of the calculation in the format
-Result: <calculated_value>
+Current answer: <calculated_value>
 
 ## Error Handling
 - If the user inputs an invalid operator, display an error message.

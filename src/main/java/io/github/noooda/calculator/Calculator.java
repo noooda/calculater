@@ -4,66 +4,73 @@ import java.util.Scanner;
 
 
 public class Calculator {
-    int ans;
-    int num;
-    String operator;
+    private final CalculatorView calculatorView;
+    private final CalculatorLogic calculatorLogic;
+    private double currentAns;
+    private double currentNum;
+    private String operator;
 
-    public Calculator() {
-        this.ans = 0;
-        this.num = 0;
-        this.operator = "";
+    public Calculator(CalculatorView calculatorView, CalculatorLogic calculatorLogic) {
+        this.calculatorView = calculatorView;
+        this.calculatorLogic = calculatorLogic;
+        this.reset();
     }
 
     public void start() {
-        System.out.println("Enter \"q\" to quit.");
+        System.out.println(calculatorView.startMessage());
+        try (Scanner scanner = new Scanner(System.in)) {
+            while (true) {
+                String input = scanner.nextLine().trim();
 
-        Scanner scanner = new Scanner(System.in);
-
-        while (true) {
-            String input = scanner.nextLine();
-
-            if (input.equalsIgnoreCase("q")) {
-                break;
-            }
-
-            if (input.matches("\\d+")) {
-                this.num = Integer.parseInt(input);
-
-                if (this.operator.isEmpty()) {
-                    this.ans = this.num;
+                if (input.equalsIgnoreCase("q")) {
+                    break;
+                } else if (input.equalsIgnoreCase("r")) {
+                    this.reset();
+                } else if (input.matches("[+\\-*/%]")) {
+                    operator = input;
+                } else if (input.matches("\\d+")) {
+                    this.handleNumber(Integer.parseInt(input));
                 } else {
-                    switch (this.operator) {
-                        case "+":
-                            this.ans += this.num;
-                            break;
-                        case "-":
-                            this.ans -= this.num;
-                            break;
-                        case "*":
-                            this.ans *= this.num;
-                            break;
-                        case "/":
-                            if (this.num != 0) {
-                                this.ans /= this.num;
-                            } else {
-                                System.out.println("Cannot divide by zero.");
-                            }
-                            break;
-                        case "%":
-                            this.ans %= this.num;
-                            break;
-                    }
-
-                    this.operator = "";
-                    System.out.println("Current result: " + this.ans);
-                }
-            }
-
-            if (input.matches("[+\\-*/%]")) {
-                this.operator = input;
+                    System.out.println(calculatorView.requireNumOrOperator());
+                }       
             }
         }
+    }
 
-        scanner.close();
+    private void handleNumber(int num) {
+        if (operator.isEmpty()) {
+            currentNum = num;
+        } else {
+            this.calculate(num);
+        }
+    }
+
+    private void calculate(int num) {
+        try {
+            currentAns = switch (operator) {
+                case "+" -> calculatorLogic.add(this.currentNum, num, this.currentAns);
+                case "-" -> calculatorLogic.subtract(this.currentNum, num, this.currentAns);
+                case "*" -> calculatorLogic.multiply(this.currentNum, num, this.currentAns);
+                case "/" -> calculatorLogic.divide(this.currentNum, num, this.currentAns);
+                case "%" -> calculatorLogic.modulus(this.currentNum, num, this.currentAns);
+                default -> throw new IllegalStateException("Unexpected operator: " + this.operator);
+            };
+            this.showResult();
+        } catch (ArithmeticException e) {
+            System.out.println(calculatorView.divideByZero());
+        }
+    }
+
+    private void reset() {
+        this.currentAns = 0;
+        this.currentNum = 0;
+        this.operator = "";
+        System.out.println(calculatorView.resetMessage());
+    }
+
+    private void showResult() {
+        this.operator = "";
+        this.currentNum = 0;
+        System.out.println(calculatorView.currentAnswer(this.currentAns));
     }
 }
